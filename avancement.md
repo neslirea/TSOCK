@@ -1,6 +1,6 @@
 Veuillez renseigner votre avancement à chaque étape achevée et testée et par défaut à la fin de chaque séance de TP 
 
-NOMs & prénoms du groupe étudiants :  "A RENSEIGNER SVP "
+NOMs & prénoms du groupe étudiants :  "AUBERY Cléa MARTIN Mattew"
 
 # Avancement sur la Partie TP AIPS - Mise en oeuvre de l'application tsock 
 
@@ -10,13 +10,13 @@ L'objectif principal de la 1ère séance est de développer la v1 de tsock: code
 ### Avancement sur la partie SOURCE UDP
 veuillez cocher les seules cases qui correspondent aux étapes validées.  
 
-[ ] la gestion des options -s, -u,  le nombre et Taille par défaut des messages , nom de la machine destinataire,  numéro de port du puit est opérationnelle
+[X] la gestion des options -s, -u,  le nombre et Taille par défaut des messages , nom de la machine destinataire,  numéro de port du puit est opérationnelle
 
-[ ] la création du socket UDP local et la construction de l'adresse du socket distant est correcte
+[X] la création du socket UDP local et la construction de l'adresse du socket distant est correcte
 
-[ ] l’envoi de  messages en utilisant l'appel système sendto (qui retourne une valeur >0 correspondant à la taille de chaque message envoyé) est fonctionnelle 
+[X] l’envoi de  messages en utilisant l'appel système sendto (qui retourne une valeur >0 correspondant à la taille de chaque message envoyé) est fonctionnelle 
 
-[ ] la réception côté puit (sur nc ou la version "enseignant" de tsock) des messages envoyés par votre client est correcte
+[X] la réception côté puit (sur nc ou la version "enseignant" de tsock) des messages envoyés par votre client est correcte
 
 ### Avancement Point sur la partie puit UDP.
 
