@@ -18,6 +18,8 @@ données du réseau */
 /* pour la gestion des erreurs */
 #include <errno.h>
 
+#include <arpa/inet.h>
+
 
 // En tant que source :
 // 1 - creation d'un socket (local)
@@ -253,15 +255,11 @@ void main (int argc, char **argv)
 
         else{ // Si on utilise le protocole TCP
 
-            printf("test \n");
-
             int ecoute = listen(sock,1);
             if(ecoute == -1){
                 printf("Erreur ecoute\n");
                 exit(1);
             }
-            
-            printf("en ecoute\n");
 
             int acceptation = accept(sock,(struct sockaddr*)&adr_em, &lg_adr_em); // socket dédié à la récéption des données
             if(acceptation == -1){
@@ -269,12 +267,16 @@ void main (int argc, char **argv)
                 exit(1);
             }
 
-            printf("connexion accepte\n");
+			//Affiche l'acceptation de la connection avec l'adresse IP de la source
+            printf("connexion accepte avec %s\n", inet_ntoa(adr_em.sin_addr));
 
+			// Lecture des messages
             while ((nbOctets=read(acceptation, pmesg, taille_donnee)) > 0){
                 afficher_message(pmesg, nbOctets);
             }
-
+			
+			// Fermeture
+			printf("fin de la connexion\n");
             if (close(sock)==-1) {
                 printf("echec de destruction du socket\n");
                 exit(1);
