@@ -198,7 +198,7 @@ void main (int argc, char **argv)
                 i++;
       	    }
 
-              
+
         }
 	}
 
@@ -271,7 +271,7 @@ void main (int argc, char **argv)
 
             printf("connexion accepte\n");
 
-            while ((nbOctets=read(acceptation, pmesg, taille_donnee)) != -1){
+            while ((nbOctets=read(acceptation, pmesg, taille_donnee)) > 0){
                 afficher_message(pmesg, nbOctets);
             }
 
