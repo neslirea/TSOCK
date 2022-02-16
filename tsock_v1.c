@@ -151,7 +151,7 @@ void main (int argc, char **argv)
 		struct sockaddr_in adr_distant;
 
 		// affectation domaine et port
-		memset((char*)&adr_distant, 0, sizeof(adr_distant));
+		memset((char*)&adr_distant, 0, sizeof(adr_distant)); // A COMPLETER
 		adr_distant.sin_family = AF_INET; // domaine internet
 		adr_distant.sin_port = port; // port port
 
@@ -198,10 +198,10 @@ void main (int argc, char **argv)
 		memset((char*)&adr_local, 0, sizeof(adr_local));
 		adr_local.sin_family = AF_INET; // domaine internet
 		adr_local.sin_port = port; // port port
-		adr_local.sin_addr.s_addr = INADDR_ANY // on récupère sur toutes nos cartes réseaux (Wi-Fi et Ethernet (vive ethernet))
+		adr_local.sin_addr.s_addr = INADDR_ANY; // on récupère sur toutes nos cartes réseaux (Wi-Fi et Ethernet (vive ethernet))
 
 		// associer @ et socket
-		int bind = bind(sock,(const struct sockaddr *)&adr_distant,lg_adr_local);
+		int bind_addr = bind(sock,(const struct sockaddr *)&adr_local,lg_adr_local);
 
 		if(bind == -1){
 			printf("echec du bind");
@@ -210,8 +210,14 @@ void main (int argc, char **argv)
 
 
 		//reception
-      	while ((lg_mesg=recvfrom(sock, pmesg, lg_max, 0, (struct sockaddr*)&adr_em, &lg_adr_em)) != -1){
-        	afficher_message(pmesg, lg_mesg);
+		char * pmesg = malloc(sizeof(char)*(taille_donnee+1));
+		int nbOctets;
+
+		struct sockaddr_in adr_em;
+		int lg_adr_em = sizeof(adr_em);
+
+      	while ((nbOctets=recvfrom(sock, pmesg, taille_donnee, 0, (struct sockaddr*)&adr_em, &lg_adr_em)) != -1){
+        	afficher_message(pmesg, nbOctets);
       	}
 			
 			//fermeture

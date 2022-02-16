@@ -24,6 +24,13 @@ données du réseau */
 // 2 - construire @IP à atteindre = SOCKET DISTANT
 // 3 - envoi de données au port PORT
 
+
+// En tant que puit :
+// 1 - Creation d'un socket (local)
+// 2 - Adressage du socket 
+// ** 2.1 - Construction de l'@ (struct sock addr_in adr)
+// ** 2.2 - associer @ et socket (= bind())
+
 void construire_message(char *message, char motif, int lg) {
     int i;
     for (i=0;i<lg;i++){
@@ -56,6 +63,10 @@ void main (int argc, char **argv)
 	int domaine = AF_INET;
 	int type;
 	int proto;
+
+    // Variable pour message
+    char * pmesg = malloc(sizeof(char)*(taille_donnee+1));
+
 
 	while ((c = getopt(argc, argv, "upn:s")) != -1) {
 		switch (c) {
@@ -108,8 +119,8 @@ void main (int argc, char **argv)
     }
     else{
         printf("le protocole utilise est TCP \n");
-        type = SOCK_STREAM;
-        proto = IPPROTO_TCP;
+		type = SOCK_STREAM;
+		proto = IPPROTO_TCP;
     }
 
 	if (nb_message != -1) {
@@ -128,45 +139,112 @@ void main (int argc, char **argv)
         }
 	}
 
-	//// --- CREATION DU SOCKET LOCAL --- ////
-	int sock = socket(domaine, type, proto); // Renvoie -1 SI erreur SINON renvoie une representation interne du socket)
-	// utile socket --> http://manpagesfr.free.fr/man/man2/socket.2.html
-	if(sock == -1){
-		printf("erreur socket (local)");
-		exit(1);
+	if(source == 1){ // si on est la source 
+		//// --- CREATION DU SOCKET LOCAL --- ////
+		int sock = socket(domaine, type, proto); // Renvoie -1 SI erreur SINON renvoie une representation interne du socket)
+		// utile socket --> http://manpagesfr.free.fr/man/man2/socket.2.html
+		if(sock == -1){
+			printf("erreur socket (local)");
+			exit(1);
+		}
+
+		printf("sock = %d \n", sock);
+
+		//// --- CONSTRUCTION SOCKET DISTANT + @ --- //// 
+		// déclaration 
+		struct hostent *hp;
+		struct sockaddr_in adr_distant;
+        int lg_adr_distant = sizeof(adr_distant);
+
+		// affectation domaine et port
+		memset((char*)&adr_distant, 0, sizeof(adr_distant)); // A COMPLETER
+		adr_distant.sin_family = AF_INET; // domaine internet
+		adr_distant.sin_port = port; // port port
+
+		// affection @IP 
+		if((hp = gethostbyname(host)) == NULL){
+			printf("erreur gethostbyname\n");
+			exit(1);
+		}
+		memcpy((char*)&(adr_distant.sin_addr.s_addr), hp->h_addr, hp->h_length);
+
+        if(protocole == 0){ // Si on utilise le protocole UDP
+            //// --- EMISSION DU MESSAGE --- //
+            char * message = malloc(sizeof(char)*(taille_donnee+1));
+            for (int i=0;i<nb_message;i++){
+                construire_message(message, 'a'+i, taille_donnee);
+                printf("\n");
+                afficher_message(message, taille_donnee);
+                //Envoi du message 
+                sendto(sock,message,taille_donnee, 0,(const struct sockaddr *)&adr_distant, lg_adr_distant);
+			}
+		free(message);
+        }
+
+        else{ // Si on utilise le protocole TCP
+            int etabConnexion = connect(sock,(const struct sockaddr *)&adr_distant, lg_adr_distant);
+            if(etabConnexion == -1){
+                printf("echec de l'etablissement de la connexion");
+                exit(1);
+            }  
+
+            write(sock,pmesg,taille_donnee);
+
+
+
+        }
+		
 	}
 
-	printf("sock = %d \n", sock);
+	else{ // si on est le puit
 
-	//// --- CONSTRUCTION SOCKET DISTANT + @ --- //// 
-	// déclaration 
-	struct hostent *hp;
-	struct sockaddr_in adr_distant;
+		//// --- CREATION DU SOCKET LOCAL --- ////
+		int sock = socket(domaine, type, proto); // Renvoie -1 SI erreur SINON renvoie une representation interne du socket)
+		// utile socket --> http://manpagesfr.free.fr/man/man2/socket.2.html
+		if(sock == -1){
+			printf("erreur socket (local)");
+			exit(1);
+		}
 
-	// affectation domaine et port
-	memset((char*)&adr_distant, 0, sizeof(adr_distant));
-	adr_distant.sin_family = AF_INET; // domaine internet
-	adr_distant.sin_port = port; // port port
+		printf("sock = %d \n", sock);
 
-	// affection @IP 
-	if((hp = gethostbyname(host)) == NULL){
-		printf("erreur gethostbyname\n");
-		exit(1);
+		//// --- CONSTRUCTION @ SOCKET LOCAL  --- //// 
+
+		// déclaration 
+		struct sockaddr_in adr_local;
+		int lg_adr_local = sizeof(adr_local);
+
+		// affectation domaine et port
+		memset((char*)&adr_local, 0, sizeof(adr_local));
+		adr_local.sin_family = AF_INET; // domaine internet
+		adr_local.sin_port = port; // port port
+		adr_local.sin_addr.s_addr = INADDR_ANY; // on récupère sur toutes nos cartes réseaux (Wi-Fi et Ethernet (vive ethernet))
+
+		// associer @ et socket
+		int bind_addr = bind(sock,(const struct sockaddr *)&adr_local,lg_adr_local);
+
+		if(bind == -1){
+			printf("echec du bind");
+			exit(1);
+		}
+
+
+		//reception
+		int nbOctets;
+
+		struct sockaddr_in adr_em;
+		int lg_adr_em = sizeof(adr_em);
+
+      	while ((nbOctets=recvfrom(sock, pmesg, taille_donnee, 0, (struct sockaddr*)&adr_em, &lg_adr_em)) != -1){
+        	afficher_message(pmesg, nbOctets);
+      	}
+			
+			//fermeture
+      	if (close(sock)==-1) {
+        	printf("échec de destruction du socket\n");
+        	exit(1);
+      	}
 	}
-	memcpy((char*)&(adr_distant.sin_addr.s_addr), hp->h_addr, hp->h_length);
-
-	//// --- EMISSION DU MESSAGE --- //
-	int lg_adr_distant = sizeof(adr_distant);
-	char * message = malloc(sizeof(char)*(taille_donnee+1));
-   	for (int i=0;i<nb_message;i++){
-       	construire_message(message, (char)65+i, taille_donnee);
-		printf("\n");
-		//printf("%s",message);
-       	afficher_message(message, taille_donnee);
-       	//Envoi du message 
-		sendto(sock,message,taille_donnee, 0,(const struct sockaddr *)&adr_distant, lg_adr_distant);
-	   	}
-   	free(message);
 
 
 }
