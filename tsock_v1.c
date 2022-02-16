@@ -166,8 +166,12 @@ void main (int argc, char **argv)
 		int lg_adr_distant = sizeof(adr_distant);
 		char * message = malloc(sizeof(char)*(taille_donnee+1));
 		for (int i=0;i<nb_message;i++){
-			construire_message(message, 'a'+i, taille_donnee);
-			printf("\n");
+			construire_message(message, 'a'+(i%26), taille_donnee);
+            memset(message,(char)32,5);
+            char * nb = malloc(sizeof(char)*6);
+            sprintf(nb, "%d", i);
+            memcpy(message+(5-strlen(nb)), nb, strlen(nb));
+
 			//printf("%s",message);
 			afficher_message(message, taille_donnee);
 			//Envoi du message 
