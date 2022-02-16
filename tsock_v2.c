@@ -40,6 +40,17 @@ void construire_message(char *message, char motif, int lg) {
     }
 }
 
+void construire_message2(char *message, char motif, int num, int lg) {
+    construire_message(message, motif, lg);
+	if (lg>5){
+		memset(message,(char)32,5);
+		char * nb = malloc(sizeof(char)*6);
+		sprintf(nb, "%d", num);
+		memcpy(message+(5-strlen(nb)), nb, strlen(nb));
+		free(nb);
+	}
+}
+
 void afficher_message(char *message, int lg){
     int i;
     printf("message construit : ");
@@ -175,8 +186,8 @@ void main (int argc, char **argv)
             //// --- EMISSION DU MESSAGE --- //
             char * message = malloc(sizeof(char)*(taille_donnee+1));
             for (int i=0;i<nb_message;i++){
-                construire_message(message, 'a'+i, taille_donnee);
-                printf("\n");
+				construire_message2(message, 'a'+(i%26), i, taille_donnee);
+
                 afficher_message(message, taille_donnee);
                 //Envoi du message 
                 sendto(sock,message,taille_donnee, 0,(const struct sockaddr *)&adr_distant, lg_adr_distant);
@@ -192,15 +203,13 @@ void main (int argc, char **argv)
             }  
 
             int i = 0;
-            construire_message(pmesg, 'a'+i, taille_donnee);
+            construire_message2(pmesg, 'a', i, taille_donnee);
             while (((nbOctets = write(sock,pmesg,taille_donnee)) != -1) && (i < nb_message)){
-                construire_message(pmesg, 'a'+i, taille_donnee);
-                printf("\n");
+                construire_message2(pmesg, 'a'+(i%26), i, taille_donnee);
+
                 afficher_message(pmesg, taille_donnee);
                 i++;
       	    }
-
-
         }
 	}
 
