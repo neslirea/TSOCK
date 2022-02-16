@@ -190,7 +190,8 @@ void main (int argc, char **argv)
             }  
 
             int i = 0;
-            while ((nbOctets = write(sock,pmesg,taille_donnee)) != -1){
+            construire_message(pmesg, 'a'+i, taille_donnee);
+            while (((nbOctets = write(sock,pmesg,taille_donnee)) != -1) && (i < nb_message)){
                 construire_message(pmesg, 'a'+i, taille_donnee);
                 printf("\n");
                 afficher_message(pmesg, taille_donnee);
