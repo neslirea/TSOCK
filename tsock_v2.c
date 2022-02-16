@@ -197,6 +197,8 @@ void main (int argc, char **argv)
                 afficher_message(pmesg, taille_donnee);
                 i++;
       	    }
+
+              
         }
 	}
 
@@ -227,25 +229,58 @@ void main (int argc, char **argv)
 		// associer @ et socket
 		int bind_addr = bind(sock,(const struct sockaddr *)&adr_local,lg_adr_local);
 
-		if(bind == -1){
+		if(bind_addr == -1){
 			printf("echec du bind");
 			exit(1);
 		}
 
+        struct sockaddr_in adr_em;
+        int lg_adr_em = sizeof(adr_em);
 
-		//reception
-		struct sockaddr_in adr_em;
-		int lg_adr_em = sizeof(adr_em);
+        if(protocole == 0){ // Si on utilise le protocole UDP
+            //reception
 
-      	while ((nbOctets=recvfrom(sock, pmesg, taille_donnee, 0, (struct sockaddr*)&adr_em, &lg_adr_em)) != -1){
-        	afficher_message(pmesg, nbOctets);
-      	}
-			
-			//fermeture
-      	if (close(sock)==-1) {
-        	printf("échec de destruction du socket\n");
-        	exit(1);
-      	}
+            while ((nbOctets=recvfrom(sock, pmesg, taille_donnee, 0, (struct sockaddr*)&adr_em, &lg_adr_em)) != -1){
+                afficher_message(pmesg, nbOctets);
+            }
+                
+                //fermeture
+            if (close(sock)==-1) {
+                printf("échec de destruction du socket\n");
+                exit(1);
+            }
+        }    
+
+        else{ // Si on utilise le protocole TCP
+
+            printf("test \n");
+
+            int ecoute = listen(sock,1);
+            if(ecoute == -1){
+                printf("Erreur ecoute\n");
+                exit(1);
+            }
+            
+            printf("en ecoute\n");
+
+            int acceptation = accept(sock,(struct sockaddr*)&adr_em, &lg_adr_em); // socket dédié à la récéption des données
+            if(acceptation == -1){
+                printf("echec de l'etablissement de la connexion");
+                exit(1);
+            }
+
+            printf("connexion accepte\n");
+
+            while ((nbOctets=read(acceptation, pmesg, taille_donnee)) != -1){
+                afficher_message(pmesg, nbOctets);
+            }
+
+            if (close(sock)==-1) {
+                printf("echec de destruction du socket\n");
+                exit(1);
+            }
+        }
+
 	}
 
 
