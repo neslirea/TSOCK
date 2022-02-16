@@ -66,6 +66,7 @@ void main (int argc, char **argv)
 
     // Variable pour message
     char * pmesg = malloc(sizeof(char)*(taille_donnee+1));
+	int nbOctets;
 
 
 	while ((c = getopt(argc, argv, "upn:s")) != -1) {
@@ -184,16 +185,18 @@ void main (int argc, char **argv)
         else{ // Si on utilise le protocole TCP
             int etabConnexion = connect(sock,(const struct sockaddr *)&adr_distant, lg_adr_distant);
             if(etabConnexion == -1){
-                printf("echec de l'etablissement de la connexion");
+                printf("echec de l'etablissement de la connexion \n");
                 exit(1);
             }  
 
-            write(sock,pmesg,taille_donnee);
-
-
-
+            int i = 0;
+            while ((nbOctets = write(sock,pmesg,taille_donnee)) != -1){
+                construire_message(pmesg, 'a'+i, taille_donnee);
+                printf("\n");
+                afficher_message(pmesg, taille_donnee);
+                i++;
+      	    }
         }
-		
 	}
 
 	else{ // si on est le puit
@@ -230,8 +233,6 @@ void main (int argc, char **argv)
 
 
 		//reception
-		int nbOctets;
-
 		struct sockaddr_in adr_em;
 		int lg_adr_em = sizeof(adr_em);
 
