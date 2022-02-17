@@ -89,11 +89,11 @@ void main (int argc, char **argv)
 	int nbOctets;
 
 
-	while ((c = getopt(argc, argv, "upn:s")) != -1) {
+	while ((c = getopt(argc, argv, "upl:n:s")) != -1) { // ":" signifie que la valeur attend un argument
 		switch (c) {
 		case 'p': // tsock -p [-options] PORT --> exécution en tant que puit sur le port PORT
 			if (source == 1) { // variable en désaccord avec l'option précisée
-				printf("usage: cmd [-p|-s][-n ##]\n"); 
+				printf("usage: cmd [-p|-s][-n ##][-l ##]\n"); 
 				exit(1); // On quitte le programme
 			}
 			source = 0;
@@ -101,7 +101,7 @@ void main (int argc, char **argv)
 
 		case 's': // tsock -s [-options] PORT --> execution en tant de source sur le port PORT
 			if (source == 0) { // variable en désaccord avec l'option précisée
-				printf("usage: cmd [-p|-s][-n ##]\n");
+				printf("usage: cmd [-p|-s][-n ##][-l ##]\n");
 				exit(1); // On quitte le programme
 			}
 			source = 1;
@@ -117,14 +117,19 @@ void main (int argc, char **argv)
 			proto = IPPROTO_UDP;
             break;
 
+		case 'l': // -l : représente le nombre d'octets par message
+			taille_donnee = atoi(optarg);
+			break;
+
+
 		default:
-			printf("usage: cmd [-p|-s][-n ##]\n");
+			printf("usage: cmd [-p|-s][-n ##][-l ##]\n");
 			break;
         }
 	}
 
 	if (source == -1) {
-		printf("usage: cmd [-p|-s][-n ##]\n");
+		printf("usage: cmd [-p|-s][-n ##][-l ##]\n");
 		exit(1) ;
 	}
     
