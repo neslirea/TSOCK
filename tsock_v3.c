@@ -42,6 +42,7 @@ void construire_message(char *message, char motif, int lg) {
 
 void construire_message2(char *message, char motif, int num, int lg) {
     construire_message(message, motif, lg);
+	message[lg]='\0';
 	if (lg>5){
 		char * nb = malloc(sizeof(char)*6);
 		sprintf(nb, "%d", num);
@@ -66,7 +67,6 @@ void afficher_message_puit(int lg_message, int nb_recep, char *message){
 	printf("PUITS:Reception n°%i (%i)[%s]\n", nb_recep, lg_message, message);
 }
 
-
 void main (int argc, char **argv)
 {
 	int c;
@@ -85,7 +85,7 @@ void main (int argc, char **argv)
 	int proto;
 
     // Variable pour message
-    char * pmesg = malloc(sizeof(char)*(taille_donnee+1));
+    char * pmesg = malloc(sizeof(char)*(taille_donnee+2));
 	int nbOctets;
 
 
