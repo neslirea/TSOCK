@@ -60,6 +60,7 @@ void afficher_message(char *message, int lg){
     } 
 	printf("\n");
 }
+
 void afficher_message_source(int lg_message, int nb_envoi, char *message){
 	printf("SOURCE:Envoi n°%i (%i)[%s]\n", nb_envoi, lg_message, message);
 }
@@ -84,7 +85,7 @@ void main (int argc, char **argv)
 	int type;
 	int proto;
 
-    // Variable pour message
+    // Variables pour message
     char * pmesg = malloc(sizeof(char)*(taille_donnee+2));
 	int nbOctets;
 
@@ -138,7 +139,7 @@ void main (int argc, char **argv)
 		proto = IPPROTO_TCP;
     }
 	
-	// --- SOURCE --- //
+	//// --- SOURCE --- ////
 	if(source == 1){ 
 		if (protocole == 0){
 			printf("SOURCE:lg_mesg_emis=%i,port=%i,nb_envois=%i,TP=udp,dest=%s\n", taille_donnee, port, nb_message, host);
@@ -147,7 +148,7 @@ void main (int argc, char **argv)
 			printf("SOURCE:lg_mesg_emis=%i,port=%i,nb_envois=%i,TP=tcp,dest=%s\n", taille_donnee, port, nb_message, host);
 		}
 
-		////--- CREATION DU SOCKET LOCAL --- ////
+		//--- CREATION DU SOCKET LOCAL --- //
 		int sock = socket(domaine, type, proto); // Renvoie -1 SI erreur SINON renvoie une representation interne du socket)
 		// utile socket --> http://manpagesfr.free.fr/man/man2/socket.2.html
 		if(sock == -1){
@@ -155,7 +156,7 @@ void main (int argc, char **argv)
 			exit(1);
 		}
 
-		//// --- CONSTRUCTION SOCKET DISTANT + @ --- ////
+		// --- CONSTRUCTION SOCKET DISTANT + @ --- //
 		// déclaration 
 		struct hostent *hp;
 		struct sockaddr_in adr_distant;
@@ -173,12 +174,12 @@ void main (int argc, char **argv)
 		}
 		memcpy((char*)&(adr_distant.sin_addr.s_addr), hp->h_addr, hp->h_length);
 
-        if(protocole == 0){ // Si on utilise le protocole UDP
-            //// --- EMISSION DU MESSAGE --- //
+		// --- UDP --- //
+        if(protocole == 0){ 
+            // --- EMISSION DU MESSAGE --- //
             char * message = malloc(sizeof(char)*(taille_donnee+1));
             for (int i=0;i<nb_message;i++){
 				construire_message2(message, 'a'+(i%26), i, taille_donnee);
-
                 afficher_message_source(taille_donnee, i+1, message);
                 //Envoi du message 
                 sendto(sock,message,taille_donnee, 0,(const struct sockaddr *)&adr_distant, lg_adr_distant);
@@ -186,7 +187,8 @@ void main (int argc, char **argv)
 		free(message);
         }
 
-        else{ // Si on utilise le protocole TCP
+		// --- TCP --- //
+        else{ 
             int etabConnexion = connect(sock,(const struct sockaddr *)&adr_distant, lg_adr_distant);
             if(etabConnexion == -1){
                 printf("echec de l'etablissement de la connexion \n");
@@ -199,14 +201,14 @@ void main (int argc, char **argv)
                 afficher_message_source(taille_donnee, i+1, pmesg);
                 nbOctets = write(sock,pmesg,taille_donnee);
                 i++;
-              }
+            }
         }
 	}
 
-	// --- PUIT --- //
+	//// --- PUIT --- ////
 	else{ 
 
-		//// --- CREATION DU SOCKET LOCAL --- ////
+		// --- CREATION DU SOCKET LOCAL --- //
 		int sock = socket(domaine, type, proto); // Renvoie -1 SI erreur SINON renvoie une representation interne du socket)
 		// utile socket --> http://manpagesfr.free.fr/man/man2/socket.2.html
 		if(sock == -1){
@@ -214,7 +216,7 @@ void main (int argc, char **argv)
 			exit(1);
 		}
 
-		//// --- CONSTRUCTION @ SOCKET LOCAL  --- //// 
+		// --- CONSTRUCTION @ SOCKET LOCAL  --- //
 
 		// déclaration 
 		struct sockaddr_in adr_local;

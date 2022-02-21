@@ -60,6 +60,13 @@ void afficher_message(char *message, int lg){
 	printf("\n");
 }
 
+void afficher_message_source(int lg_message, int nb_envoi, char *message){
+	printf("SOURCE:Envoi n°%i (%i)[%s]\n", nb_envoi, lg_message, message);
+}
+void afficher_message_puit(int lg_message, int nb_recep, char *message){
+	printf("PUITS:Reception n°%i (%i)[%s]\n", nb_recep, lg_message, message);
+}
+
 void main (int argc, char **argv)
 {
 	int c;
@@ -153,8 +160,9 @@ void main (int argc, char **argv)
         }
 	}
 
-	if(source == 1){ // si on est la source 
-		//// --- CREATION DU SOCKET LOCAL --- ////
+	//// -- SOURCE -- ////
+	if(source == 1){
+		// --- CREATION DU SOCKET LOCAL --- //
 		int sock = socket(domaine, type, proto); // Renvoie -1 SI erreur SINON renvoie une representation interne du socket)
 		// utile socket --> http://manpagesfr.free.fr/man/man2/socket.2.html
 		if(sock == -1){
@@ -164,7 +172,7 @@ void main (int argc, char **argv)
 
 		printf("sock = %d \n", sock);
 
-		//// --- CONSTRUCTION SOCKET DISTANT + @ --- //// 
+		//--- CONSTRUCTION SOCKET DISTANT + @ --- //
 		// déclaration 
 		struct hostent *hp;
 		struct sockaddr_in adr_distant;
@@ -182,8 +190,9 @@ void main (int argc, char **argv)
 		}
 		memcpy((char*)&(adr_distant.sin_addr.s_addr), hp->h_addr, hp->h_length);
 
-        if(protocole == 0){ // Si on utilise le protocole UDP
-            //// --- EMISSION DU MESSAGE --- //
+		// --- UDP --- //
+        if(protocole == 0){ 
+            // --- EMISSION DU MESSAGE --- //
             char * message = malloc(sizeof(char)*(taille_donnee+1));
             for (int i=0;i<nb_message;i++){
 				construire_message2(message, 'a'+(i%26), i, taille_donnee);
@@ -195,7 +204,8 @@ void main (int argc, char **argv)
 		free(message);
         }
 
-        else{ // Si on utilise le protocole TCP
+		// --- TCP --- //
+        else{ 
             int etabConnexion = connect(sock,(const struct sockaddr *)&adr_distant, lg_adr_distant);
             if(etabConnexion == -1){
                 printf("echec de l'etablissement de la connexion \n");
@@ -203,19 +213,19 @@ void main (int argc, char **argv)
             }  
 
             int i = 0;
-            construire_message2(pmesg, 'a', i, taille_donnee);
-            while (((nbOctets = write(sock,pmesg,taille_donnee)) != -1) && (i < nb_message)){
+            while (( nbOctets!= -1) && (i < nb_message)){
                 construire_message2(pmesg, 'a'+(i%26), i, taille_donnee);
-
-                afficher_message(pmesg, taille_donnee);
+                afficher_message_source(taille_donnee, i+1, pmesg);
+                nbOctets = write(sock,pmesg,taille_donnee);
                 i++;
-      	    }
+            }
         }
 	}
 
-	else{ // si on est le puit
+	//// --- PUIT --- ////
+	else{ 
 
-		//// --- CREATION DU SOCKET LOCAL --- ////
+		// --- CREATION DU SOCKET LOCAL --- //
 		int sock = socket(domaine, type, proto); // Renvoie -1 SI erreur SINON renvoie une representation interne du socket)
 		// utile socket --> http://manpagesfr.free.fr/man/man2/socket.2.html
 		if(sock == -1){
@@ -225,7 +235,7 @@ void main (int argc, char **argv)
 
 		printf("sock = %d \n", sock);
 
-		//// --- CONSTRUCTION @ SOCKET LOCAL  --- //// 
+		// --- CONSTRUCTION @ SOCKET LOCAL  --- //
 
 		// déclaration 
 		struct sockaddr_in adr_local;
@@ -248,7 +258,8 @@ void main (int argc, char **argv)
         struct sockaddr_in adr_em;
         int lg_adr_em = sizeof(adr_em);
 
-        if(protocole == 0){ // Si on utilise le protocole UDP
+		// --- UDP --- //
+        if(protocole == 0){ 
             // Reception
 
             while ((nbOctets=recvfrom(sock, pmesg, taille_donnee, 0, (struct sockaddr*)&adr_em, &lg_adr_em)) != -1){
@@ -262,9 +273,12 @@ void main (int argc, char **argv)
             }
         }    
 
-        else{ // Si on utilise le protocole TCP
+		// --- TCP --- //
+        else{ 
 
-            int ecoute = listen(sock,2);
+			printf("PUITS:lg_mesg-lu=%i, port=%i, nb_receptions=%s, TP=tcp\n",taille_donnee, port, "infini");
+
+            int ecoute = listen(sock,1);
             if(ecoute == -1){
                 printf("Erreur ecoute\n");
                 exit(1);
@@ -284,9 +298,9 @@ void main (int argc, char **argv)
                     exit(1);
 				}
 				else {
-					printf("connexion accepte avec %s\n", inet_ntoa(adr_em.sin_addr));
+					//Affiche l'acceptation de la connection avec l'adresse IP de la source
+            		printf("PUITS:connexion avec %s acceptee\n", inet_ntoa(adr_em.sin_addr));				
 				}
-
                 switch(fork()){
                     case -1 : // erreur
                         printf("erreur fork \n");
@@ -299,7 +313,7 @@ void main (int argc, char **argv)
                                 printf("echec du read des donnees\n");
                                 exit(1);
                             }
-                            afficher_message(pmesg,nbOctets);
+                            afficher_message_puit(nbOctets, i, pmesg);
                         }
 						exit(0);
 
