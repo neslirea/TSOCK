@@ -147,7 +147,7 @@ void main (int argc, char **argv)
 			printf("SOURCE:lg_mesg_emis=%i,port=%i,nb_envois=%i,TP=tcp,dest=%s\n", taille_donnee, port, nb_message, host);
 		}
 
-		//// --- CREATION DU SOCKET LOCAL --- ////
+		////--- CREATION DU SOCKET LOCAL --- ////
 		int sock = socket(domaine, type, proto); // Renvoie -1 SI erreur SINON renvoie une representation interne du socket)
 		// utile socket --> http://manpagesfr.free.fr/man/man2/socket.2.html
 		if(sock == -1){
@@ -155,7 +155,7 @@ void main (int argc, char **argv)
 			exit(1);
 		}
 
-		//// --- CONSTRUCTION SOCKET DISTANT + @ --- //// 
+		//// --- CONSTRUCTION SOCKET DISTANT + @ --- ////
 		// déclaration 
 		struct hostent *hp;
 		struct sockaddr_in adr_distant;
@@ -194,13 +194,12 @@ void main (int argc, char **argv)
             }  
 
             int i = 0;
-            construire_message2(pmesg, 'a', i, taille_donnee);
-            while (((nbOctets = write(sock,pmesg,taille_donnee)) != -1) && (i < nb_message)){
+            while (( nbOctets!= -1) && (i < nb_message)){
                 construire_message2(pmesg, 'a'+(i%26), i, taille_donnee);
-
                 afficher_message_source(taille_donnee, i+1, pmesg);
+                nbOctets = write(sock,pmesg,taille_donnee);
                 i++;
-      	    }
+              }
         }
 	}
 
