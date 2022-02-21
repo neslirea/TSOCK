@@ -249,13 +249,13 @@ void main (int argc, char **argv)
         int lg_adr_em = sizeof(adr_em);
 
         if(protocole == 0){ // Si on utilise le protocole UDP
-            //reception
+            // Reception
 
             while ((nbOctets=recvfrom(sock, pmesg, taille_donnee, 0, (struct sockaddr*)&adr_em, &lg_adr_em)) != -1){
                 afficher_message(pmesg, nbOctets);
             }
                 
-                //fermeture
+                // Fermeture
             if (close(sock)==-1) {
                 printf("échec de destruction du socket\n");
                 exit(1);
@@ -270,13 +270,11 @@ void main (int argc, char **argv)
                 exit(1);
             }
 
-            int acceptation = accept(sock,(struct sockaddr*)&adr_em, &lg_adr_em); // socket dédié à la récéption des données
+            /*int acceptation = accept(sock,(struct sockaddr*)&adr_em, &lg_adr_em); // socket dédié à la récéption des données
             if(acceptation == -1){
                 printf("echec de l'etablissement de la connexion");
                 exit(1);
-            }
-
-            printf("connexion accepte avec %s\n", inet_ntoa(adr_em.sin_addr));
+            }*/
 
 			//Affiche l'acceptation de la connection avec l'adresse IP de la source
             int sock_bis;
@@ -284,7 +282,11 @@ void main (int argc, char **argv)
                 if((sock_bis = accept(sock,(struct sockaddr*)&adr_em, &lg_adr_em)) == -1){
                     printf("echec du accept \n");
                     exit(1);
-                }
+				}
+				else {
+					printf("connexion accepte avec %s\n", inet_ntoa(adr_em.sin_addr));
+				}
+
                 switch(fork()){
                     case -1 : // erreur
                         printf("erreur fork \n");
@@ -299,16 +301,11 @@ void main (int argc, char **argv)
                             }
                             afficher_message(pmesg,nbOctets);
                         }
+						exit(0);
 
                     default : // on est dans le proc pere
                         close(sock_bis); // fermeture du proc fils
-                }
-
-            }
-            /*
-			// Lecture des messages
-            while ((nbOctets=read(acceptation, pmesg, taille_donnee)) > 0){
-                afficher_message(pmesg, nbOctets);
+				}
             }
 			
 			// Fermeture
@@ -316,11 +313,7 @@ void main (int argc, char **argv)
             if (close(sock)==-1) {
                 printf("echec de destruction du socket\n");
                 exit(1);
-            }
-            */
+            }   
         }
-
 	}
-
-
 }

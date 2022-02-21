@@ -137,8 +137,9 @@ void main (int argc, char **argv)
 		type = SOCK_STREAM;
 		proto = IPPROTO_TCP;
     }
-
-	if(source == 1){ // si on est la source 
+	
+	// --- SOURCE --- //
+	if(source == 1){ 
 		if (protocole == 0){
 			printf("SOURCE:lg_mesg_emis=%i,port=%i,nb_envois=%i,TP=udp,dest=%s\n", taille_donnee, port, nb_message, host);
 		}
@@ -203,7 +204,8 @@ void main (int argc, char **argv)
         }
 	}
 
-	else{ // si on est le puit
+	// --- PUIT --- //
+	else{ 
 
 		//// --- CREATION DU SOCKET LOCAL --- ////
 		int sock = socket(domaine, type, proto); // Renvoie -1 SI erreur SINON renvoie une representation interne du socket)
@@ -236,7 +238,8 @@ void main (int argc, char **argv)
         struct sockaddr_in adr_em;
         int lg_adr_em = sizeof(adr_em);
 
-        if(protocole == 0){ // Si on utilise le protocole UDP
+		// --- UDP --- //
+        if(protocole == 0){ 
 			printf("PUITS:lg_mesg-lu=%i, port=%i, nb_receptions=%s, TP=udp\n",taille_donnee, port, "infini");
             //reception
 			int i=1;
@@ -252,7 +255,8 @@ void main (int argc, char **argv)
             }
         }    
 
-        else{ // Si on utilise le protocole TCP
+		// --- TCP --- //
+        else{ 
 			printf("PUITS:lg_mesg-lu=%i, port=%i, nb_receptions=%s, TP=tcp\n",taille_donnee, port, "infini");
             int ecoute = listen(sock,1);
             if(ecoute == -1){
