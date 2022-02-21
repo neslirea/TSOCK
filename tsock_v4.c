@@ -290,7 +290,6 @@ void main (int argc, char **argv)
                 exit(1);
             }*/
 
-			//Affiche l'acceptation de la connection avec l'adresse IP de la source
             int sock_bis;
             while(1){
                 if((sock_bis = accept(sock,(struct sockaddr*)&adr_em, &lg_adr_em)) == -1){
@@ -301,6 +300,7 @@ void main (int argc, char **argv)
 					//Affiche l'acceptation de la connection avec l'adresse IP de la source
             		printf("PUITS:connexion avec %s acceptee\n", inet_ntoa(adr_em.sin_addr));				
 				}
+
                 switch(fork()){
                     case -1 : // erreur
                         printf("erreur fork \n");
