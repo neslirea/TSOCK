@@ -90,3 +90,11 @@ Un fichier avancement.md vous est fourni avec des étapes prédéfinies et discu
 ## Liens utiles 
 
 Aide pour la création d’un dépôt depuis un template : https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-repository-from-a-template
+
+## UPDATE README POUR RENDU 
+Nom des étudiants : 
+Mattew MARTIN
+Cléa AUBERY
+
+Commande pour générer l'exécutable  : 
+gcc tsock_v3.c -o tsock_v3
